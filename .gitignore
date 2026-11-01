@@ -1,0 +1,8 @@
+# 本地生成/私有内容，不提交到 GitHub
+tmp/
+资料/
+uploads/
+materials-data.js
+screenshots/
+*.log
+.DS_Store

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>开场动画示意 · 三种方案</title>
+<style>
+  :root{
+    --bg:#F4F1EA; --card:#fff; --ink:#1E3B2F; --ink2:#22221F; --muted:#8C8A81;
+    --line:#E2DFD6; --soft:#FAF8F3; --gold:#B2613C;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink2);font-family:var(--font);-webkit-font-smoothing:antialiased}
+  .page{max-width:820px;margin:0 auto;padding:38px 24px 50px}
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--muted)}
+  h1{font-size:30px;line-height:1.15;margin:9px 0 7px;color:var(--ink);letter-spacing:-.02em}
+  .lead{margin:0;font-size:12px;line-height:1.7;color:var(--muted);max-width:760px}
+  .top-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .replay-all{height:36px;padding:0 15px;border:1px solid var(--ink);border-radius:999px;background:var(--ink);color:#F2F0E8;font-size:12px;font-weight:600;cursor:pointer}
+  .replay-all:hover{background:#2A4D3D}
+  .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:24px}
+  .demo-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 8px 24px rgba(30,35,30,.04);min-width:0;overflow:hidden}
+  .demo-head{display:flex;align-items:flex-start;gap:9px;margin-bottom:11px}
+  .letter{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:8px;background:var(--soft);border:1px solid var(--line);font-family:var(--mono);font-size:11px;font-weight:600;color:var(--muted)}
+  .demo-head h2{margin:0;font-size:14px;color:var(--ink)}
+  .demo-head p{margin:2px 0 0;font-size:10px;line-height:1.4;color:var(--muted)}
+  .replay{margin-left:auto;height:26px;padding:0 10px;border:1px solid var(--line);border-radius:999px;background:var(--soft);color:var(--muted);font-size:10px;cursor:pointer;white-space:nowrap}
+  .replay:hover{color:var(--ink);border-color:#CFCBC0}
+  .stage{position:relative;height:212px;border-radius:12px;overflow:hidden;background:#F7F5EF;border:1px solid #EFECE4}
+  .mini-page{position:absolute;inset:0;padding:12px 13px;overflow:hidden}
+  .mini-top{display:flex;align-items:center;gap:6px;margin-bottom:10px;min-width:0}
+  .mini-logo{width:17px;height:17px;border-radius:5px;background:var(--ink);flex:none;position:relative}
+  .mini-logo::after{content:"";position:absolute;left:4px;right:4px;top:5px;height:2px;background:#F2F0E8;border-radius:2px;box-shadow:0 4px 0 #F2F0E8}
+  .mini-brand{font-size:7.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mini-nav{margin-left:auto;font-family:var(--mono);font-size:6.5px;letter-spacing:.04em;color:var(--muted);white-space:nowrap}
+  .mini-hero{height:65px;border-radius:9px;background:var(--ink);padding:10px 12px;color:#F2F0E8;overflow:hidden}
+  .mini-hero b{display:block;font-size:11px;line-height:1.2;font-weight:600}
+  .mini-hero span{display:block;margin-top:5px;font-size:6.5px;color:#B9C7B8}
+  .mini-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}
+  .mini-stats span{height:27px;border:1px solid #EFECE4;border-radius:6px;background:#fff;font-family:var(--mono);font-size:6px;color:var(--muted);padding:5px 6px}
+  .mini-stats b{display:block;font-family:var(--font);font-size:9px;color:var(--ink);line-height:1}
+  .mini-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:5px;margin-top:6px}
+  .mini-panel{height:52px;border:1px solid #EFECE4;border-radius:7px;background:#fff;padding:7px}
+  .mini-line{display:block;height:3px;border-radius:99px;background:#EFECE4;margin-top:5px}
+  .mini-line.short{width:62%}
+  .mini-line.color{background:#D6E4F0;width:38%}
+
+  /* A：卡片浮现 */
+  [data-demo="a"] .anim-a{opacity:.15;transform:translateY(7px)}
+  [data-demo="a"] .stage.playing .anim-a{animation:demoRise .26s cubic-bezier(.2,.7,.3,1) both;animation-delay:var(--d,0ms)}
+
+  /* B：品牌幕布 */
+  .curtain{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--ink);color:#F2F0E8;transform:translateY(0)}
+  .curtain-logo{width:30px;height:30px;border-radius:9px;background:#F2F0E8;position:relative;margin-bottom:2px}
+  .curtain-logo::after{content:"";position:absolute;left:7px;right:7px;top:9px;height:3px;background:var(--ink);border-radius:2px;box-shadow:0 7px 0 var(--ink)}
+  .curtain b{font-size:12px;font-weight:600;letter-spacing:.02em}
+  .curtain span{font-family:var(--mono);font-size:7px;letter-spacing:.14em;color:#A9BCA8}
+  [data-demo="b"] .anim-b{opacity:.15;transform:translateY(7px)}
+  [data-demo="b"] .stage.playing .curtain{animation:demoCurtain .75s cubic-bezier(.4,0,.2,1) both}
+  [data-demo="b"] .stage.playing .anim-b{animation:demoRise .28s cubic-bezier(.2,.7,.3,1) both;animation-delay:var(--d,0ms)}
+
+  /* C：目录抽屉 */
+  .drawer{position:absolute;left:0;right:0;top:0;height:100%;z-index:5;background:#F3F0E9;border-bottom:1px solid #DCD5C7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transform:translateY(-102%);box-shadow:0 10px 24px rgba(30,35,30,.12)}
+  .drawer::before{content:"";position:absolute;left:18%;right:18%;bottom:18px;height:4px;border-radius:99px;background:#DCD5C7}
+  .drawer b{font-size:12px;color:var(--ink);letter-spacing:.02em}
+  .drawer span{font-family:var(--mono);font-size:7px;letter-spacing:.12em;color:var(--muted)}
+  .drawer-kicker{font-family:var(--mono);font-size:7px;letter-spacing:.18em;color:var(--gold)}
+  [data-demo="c"] .anim-c{opacity:.15;transform:translateY(7px)}
+  [data-demo="c"] .stage.playing .drawer{animation:demoDrawer 1s cubic-bezier(.4,0,.2,1) both}
+  [data-demo="c"] .stage.playing .anim-c{animation:demoRise .28s cubic-bezier(.2,.7,.3,1) both;animation-delay:var(--d,0ms)}
+
+  .meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;font-family:var(--mono);font-size:8.5px;color:var(--muted)}
+  .meta b{font-family:var(--font);font-size:10px;color:var(--ink);font-weight:600}
+  .note{margin-top:18px;padding:10px 12px;border:1px solid #EFE3CC;border-radius:10px;background:#FBF6EC;color:#7A5A2E;font-size:10.5px;line-height:1.6}
+
+  @keyframes demoRise{from{opacity:.15;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes demoCurtain{0%{transform:translateY(0)}40%{transform:translateY(0)}72%{transform:translateY(-102%)}100%{transform:translateY(-102%)}}
+  @keyframes demoDrawer{0%{transform:translateY(-102%)}32%{transform:translateY(0)}62%{transform:translateY(0)}100%{transform:translateY(-102%)}}
+
+  @media (max-width:820px){.grid{grid-template-columns:1fr}.page{padding:26px 14px 40px}h1{font-size:25px}}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;animation-delay:0ms !important}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top-row">
+    <div>
+      <div class="eyebrow">ANIMATION OPTIONS · 0.3–1.0s</div>
+      <h1>开场动画 · 三种方案</h1>
+      <p class="lead">三个示意都是简化版。打开后会自动各播放一次，也可以点每个卡片里的“重播”单独看。正式版会默认只播放一次，并尊重系统的“减少动态效果”。</p>
+    </div>
+    <button class="replay-all" type="button" id="replayAll">全部重播</button>
+  </div>
+
+  <div class="grid">
+    <section class="demo-card" data-demo="a">
+      <div class="demo-head">
+        <span class="letter">A</span>
+        <div><h2>卡片浮现</h2><p>最快、最轻，不挡内容</p></div>
+        <button class="replay" type="button" data-replay="a">重播</button>
+      </div>
+      <div class="stage" data-stage="a">
+        <div class="mini-page">
+          <div class="mini-top"><span class="mini-logo"></span><span class="mini-brand">物理学（师范） · 学习中心</span><span class="mini-nav">首页 课表 资料 日程</span></div>
+          <div class="mini-hero anim-a" style="--d:0ms"><b>第 9 周 · 10月26日 - 11月1日</b><span>8 个时段 · 5 项待办</span></div>
+          <div class="mini-stats anim-a" style="--d:30ms"><span><b>6</b>课程</span><span><b>8</b>时段</span><span><b>18</b>资料</span><span><b>5</b>待办</span></div>
+          <div class="mini-grid">
+            <div class="mini-panel anim-a" style="--d:55ms"><span class="mini-line color"></span><span class="mini-line"></span><span class="mini-line short"></span></div>
+            <div class="mini-panel anim-a" style="--d:70ms"><span class="mini-line"></span><span class="mini-line short"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="meta"><b>0.26 秒</b><span>内容即时可见 · 无遮罩</span></div>
+    </section>
+
+    <section class="demo-card" data-demo="b">
+      <div class="demo-head">
+        <span class="letter">B</span>
+        <div><h2>品牌幕布</h2><p>有仪式感，约 1 秒</p></div>
+        <button class="replay" type="button" data-replay="b">重播</button>
+      </div>
+      <div class="stage" data-stage="b">
+        <div class="mini-page">
+          <div class="mini-top"><span class="mini-logo"></span><span class="mini-brand">物理学（师范） · 学习中心</span><span class="mini-nav">首页 课表 资料 日程</span></div>
+          <div class="mini-hero anim-b" style="--d:420ms"><b>第 9 周 · 10月26日 - 11月1日</b><span>8 个时段 · 5 项待办</span></div>
+          <div class="mini-stats anim-b" style="--d:460ms"><span><b>6</b>课程</span><span><b>8</b>时段</span><span><b>18</b>资料</span><span><b>5</b>待办</span></div>
+          <div class="mini-grid">
+            <div class="mini-panel anim-b" style="--d:490ms"><span class="mini-line color"></span><span class="mini-line"></span><span class="mini-line short"></span></div>
+            <div class="mini-panel anim-b" style="--d:510ms"><span class="mini-line"></span><span class="mini-line short"></span></div>
+          </div>
+        </div>
+        <div class="curtain"><span class="curtain-logo"></span><b>物理学（师范）</b><span>学 习 中 心 · W E E K  0 9</span></div>
+      </div>
+      <div class="meta"><b>0.75 秒</b><span>幕布上滑 · 内容随后出现</span></div>
+    </section>
+
+    <section class="demo-card" data-demo="c">
+      <div class="demo-head">
+        <span class="letter">C</span>
+        <div><h2>目录抽屉</h2><p>最贴合“卡片目录”</p></div>
+        <button class="replay" type="button" data-replay="c">重播</button>
+      </div>
+      <div class="stage" data-stage="c">
+        <div class="mini-page">
+          <div class="mini-top"><span class="mini-logo"></span><span class="mini-brand">物理学（师范） · 学习中心</span><span class="mini-nav">首页 课表 资料 日程</span></div>
+          <div class="mini-hero anim-c" style="--d:560ms"><b>第 9 周 · 10月26日 - 11月1日</b><span>8 个时段 · 5 项待办</span></div>
+          <div class="mini-stats anim-c" style="--d:600ms"><span><b>6</b>课程</span><span><b>8</b>时段</span><span><b>18</b>资料</span><span><b>5</b>待办</span></div>
+          <div class="mini-grid">
+            <div class="mini-panel anim-c" style="--d:630ms"><span class="mini-line color"></span><span class="mini-line"></span><span class="mini-line short"></span></div>
+            <div class="mini-panel anim-c" style="--d:650ms"><span class="mini-line"></span><span class="mini-line short"></span></div>
+          </div>
+        </div>
+        <div class="drawer"><span class="drawer-kicker">C A T A L O G</span><b>资料目录</b><span>2026 — 2027</span></div>
+      </div>
+      <div class="meta"><b>1.0 秒</b><span>抽屉打开 · 收回后显示首页</span></div>
+    </section>
+  </div>
+
+  <div class="note">提示：正式版不会在每次切换页面时播放，只会在首页首次打开时播放一次；点击、滚动、切页都不会被拦住。若系统开启“减少动态效果”，动画会自动关闭。</div>
+</div>
+
+<script>
+  function replay(id) {
+    const stage = document.querySelector('[data-stage="' + id + '"]');
+    if (!stage) return;
+    stage.classList.remove('playing');
+    void stage.offsetWidth;
+    stage.classList.add('playing');
+  }
+
+  document.querySelectorAll('[data-replay]').forEach((button) => {
+    button.addEventListener('click', () => replay(button.dataset.replay));
+  });
+  document.getElementById('replayAll').addEventListener('click', () => {
+    ['a', 'b', 'c'].forEach(replay);
+  });
+  window.addEventListener('load', () => {
+    setTimeout(() => ['a', 'b', 'c'].forEach(replay), 120);
+  });
+</script>
+</body>
+</html>
